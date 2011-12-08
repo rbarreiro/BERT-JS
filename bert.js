@@ -497,6 +497,49 @@ BertClass.prototype.binary_to_list = function (Str){
     return ret;
 };
 
+//To JS
+BertClass.prototype.toJS = function(bert){
+   if (bert.constructor.toString().indexOf("Array") !== -1) {
+      var res={};
+      proplistQ=true;
+      for (var i=0; i<bert.length; ++i){
+         it = bert[i];
+         if (it.type=="Tuple" && it.length==2 ){
+            if(it[0].type == "Atom"){
+               res[it[0].value] = BertClass.prototype.toJS(it[1]);
+            }else if(typeof it[0] == "string"){
+               res[it[0]] = BertClass.prototype.toJS(it[1]);
+            }else{
+               proplistQ=false;
+               break;
+            }
+         }else{
+            proplistQ=false;
+            break;
+         }
+      }
+      if (proplistQ){
+         return res;
+      }else{
+         res=[]
+         for(var i=0; i<bert.length; ++i){
+            res.push(BertClass.prototype.toJS(bert[i]));
+         }
+         return res;
+      }
+   }else if(bert.type=="Tuple"){
+      var res=[]
+      for(var i=0; i<bert.length; ++i){
+         res.push(BertClass.prototype.toJS(bert[i]));
+      }
+      return res;
+   }else if(bert.type == "Atom" || bert.type == "Binary"){
+      return bert.value
+   }else{
+      return bert;
+   }
+}
+
 var Bert = new BertClass();
 
 // Bert.test_encode();
